@@ -1,0 +1,28 @@
+services:
+  weather-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OUTPUT_DIR: /app/output
+    volumes:
+      - ./output:/app/output
+    command: ["python", "-m", "app.cli"]
+
+  weather-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OUTPUT_DIR: /app/output
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./output:/app/output
+    command: ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000"]
