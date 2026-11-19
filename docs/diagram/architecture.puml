@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+
+title Weather Data Integration Connector
+
+actor User
+
+package "Entrypoints" {
+  component "CLI\napp.cli" as CLI
+  component "FastAPI\napp.api" as API
+}
+
+package "Validation and ETL" {
+  component "Input and API Models\nCityInput, WeatherRunRequest" as InputModels
+  component "Open-Meteo and Domain Models\nOpenMeteo*Response, WeatherRecord" as DataModels
+  component "Pipeline\nrun_weather_pipeline" as Pipeline
+  component "Concurrent Extractor\napp.extractor" as Extractor
+  component "HTTPS Client\napp.client" as Client
+  component "Pandas Transformer\napp.transformer" as Transformer
+}
+
+package "Outputs" {
+  interface "DataSink" as DataSink
+  component "Atomic CSV Exporter\napp.exporter" as CSVExporter
+  component "Matplotlib Renderer\ngenerate_weather_chart\napp.visualizer" as ChartRenderer
+  database "Configured Output Directory\nweather_data.csv\nweather_chart.png" as Output
+}
+
+cloud "Open-Meteo Services" {
+  component "Geocoding API\n/v1/search" as Geocoding
+  component "Forecast API\n/v1/forecast" as Forecast
+}
+
+User --> CLI : --cities, --sort-by,\n--output-dir
+User --> API : HTTP requests
+CLI --> InputModels : validate city names
+API --> InputModels : validate bounded run request
+CLI --> Pipeline : run ETL
+API --> Pipeline : POST /integrations/weather/run
+
+Pipeline --> Extractor : extract_batch
+Extractor --> Client : private HTTPS session per worker
+Client --> Geocoding : HTTPS, timeout, retries,\nredirects disabled
+Client --> Forecast : HTTPS, Celsius and m/s
+Geocoding --> Extractor : geocoding results
+Forecast --> Extractor : current and current_units
+Extractor --> DataModels : validate upstream payloads
+Extractor --> Pipeline : WeatherRecord list
+Pipeline --> Transformer : transform and rank
+Transformer --> DataSink : canonical weather DataFrame
+DataSink <|.. CSVExporter
+CSVExporter --> Output : formula-safe atomic CSV
+
+API --> Output : GET /integrations/weather/export\nread CSV for chart requests
+Output --> API : weather_data.csv
+API --> ChartRenderer : validated CSV and chart_type
+ChartRenderer --> API : in-memory PNG bytes
+ChartRenderer --> Output : optional PNG file output
+API --> User : CSV or image/png response
+
+note right of API
+GET /health
+POST /integrations/weather/run
+GET /integrations/weather/export
+GET /integrations/weather/chart
+  ?chart_type=bar|scatter|dashboard|heatmap
+
+The chart endpoint reads the existing CSV
+and does not call Open-Meteo.
+Optional API_KEY authentication protects
+the run endpoint.
+end note
+
+note bottom of ChartRenderer
+Matplotlib Agg backend
+Bar, scatter, 1x3 dashboard, heatmap
+Figures are closed after rendering.
+end note
+
+@enduml
