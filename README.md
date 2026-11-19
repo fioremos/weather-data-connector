@@ -7,7 +7,7 @@ same extraction and transformation pipeline.
 
 ## Architecture
 
-See [the PlantUML architecture diagram](docs/diagram/architecture.puml).
+See [the PlantUML architecture diagram](docs/diagram/architecture.png).
 
 The flow follows:
 
