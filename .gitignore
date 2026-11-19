@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Linters & Type Checkers
+.ruff_cache/
+.mypy_cache/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Generated runtime artifacts (keep sample CSV only if explicitly committed)
+output/*.csv
+output/*.png
+!output/.gitkeep
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Private interview prep notes (do not push to Git)
+gelfiore.md

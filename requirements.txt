@@ -1,0 +1,18 @@
+# Core HTTP & Data Processing
+requests>=2.32.3,<3.0.0
+urllib3>=2.2.2,<3.0.0
+pandas>=2.2.2,<3.0.0
+pydantic>=2.8.2,<3.0.0
+python-dotenv>=1.0.1,<2.0.0
+
+# Bonus: Visualization
+matplotlib>=3.9.0,<4.0.0
+
+# Bonus Plus: HTTP API
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+
+# Testing & Quality
+pytest>=8.3.2,<9.0.0
+httpx>=0.27.0,<1.0.0
+pylint>=3.2.0,<4.0.0
